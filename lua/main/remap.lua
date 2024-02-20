@@ -8,6 +8,8 @@ vim.keymap.set("n", "<leader>y","\"+y")
 vim.keymap.set("v", "<leader>y","\"+y")
 vim.keymap.set("n", "<leader>Y","\"+Y")
 
+
+vim.api.nvim_create_autocmd({ "BufWritePre" }, { pattern = { "*.templ" }, callback = vim.lsp.buf.format })
 -- vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost" }, {
 --   callback = function()
 --     if vim.bo.modified and not vim.bo.readonly and vim.fn.expand("%") ~= "" and vim.bo.buftype == "" then

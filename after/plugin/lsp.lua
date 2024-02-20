@@ -36,16 +36,39 @@ lsp_zero.format_on_save({
 
 lsp_zero.setup()
 
+
 require('mason').setup({})
 
 require('mason-lspconfig').setup({
-	ensure_installed = { 'tsserver', 'rust_analyzer', 'gopls' },
+	ensure_installed = { 'tsserver', 'rust_analyzer', 'gopls'},
 	handlers = {
 		lsp_zero.default_setup,
 		lua_ls = function()
 			local lua_opts = lsp_zero.nvim_lua_ls()
 			require('lspconfig').lua_ls.setup(lua_opts)
 		end,
+
+        html = function()
+            local config = {
+                filetypes = {"html", "templ"},
+            }
+           require('lspconfig').html.setup(config)
+        end,
+
+        htmx = function()
+            local config = {
+                filetypes = {"html", "templ"},
+            }
+           require('lspconfig').htmx.setup(config)
+        end,
+
+        tailwindcss = function()
+            local config = {
+                filetypes = {"astro", "templ", "javascript", "typescript"},
+                init_options = { userLanguages = { templ = "html" } },
+            }
+           require('lspconfig').tailwindcss.setup(config)
+        end,
 	}
 })
 
@@ -69,3 +92,5 @@ cmp.setup({
 		['<C-Space>'] = cmp.mapping.complete(),
 	}),
 })
+
+vim.filetype.add({ extension = { templ = "templ" } })
