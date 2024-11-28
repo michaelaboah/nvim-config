@@ -37,7 +37,7 @@ return require('packer').startup(function(use)
 	use { "williamboman/mason-lspconfig.nvim" }
 
 
-    use { "rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap", "nvim-neotest/nvim-nio"} }
+    use { "rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap", "nvim-neotest/nvim-nio", "theHamsta/nvim-dap-virtual-text"} }
 
 	use {
 		'VonHeikemen/lsp-zero.nvim',
@@ -63,12 +63,9 @@ return require('packer').startup(function(use)
 		end
 	}
 
-
     use {
         'nvim-lualine/lualine.nvim',
         requires = { 'nvim-tree/nvim-web-devicons', opt = true }
     }
-
-    -- use "mfussenegger/nvim-dap"
 
 end)

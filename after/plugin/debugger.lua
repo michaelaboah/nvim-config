@@ -1,94 +1,101 @@
 local dap = require('dap')
 local dapui = require("dapui")
+require('nvim-dap-virtual-text').setup()
 -- https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation#ccrust-via-lldb-vscode
 dap.adapters.lldb = {
     type = "executable",
-    command = "~/.local/share/nvim/mason/bin/codelldb",
-    name = "codelldb"
+    command = "/home/michaelaboah/.local/share/nvim/mason/packages/codelldb/codelldb",
+    name = "lldb"
 }
 
 -- https://github.com/mfussenegger/nvim-dap/wiki/C-C---Rust-(gdb-via--vscode-cpptools)
 dap.adapters.cppdbg = {
     id = "cppdbg",
     type = "executable",
-    command = "~/.local/share/nvim/mason/bin/OpenDebugAd7",
+    command = "/home/michaelaboah/.local/share/nvim/mason/packages/cpptools/extension/debugAdapters/bin/OpenDebugAD7",
 }
 
 -- https://github.com/mfussenegger/nvim-dap/wiki/C-C---Rust-(gdb-via--vscode-cpptools)
-dap.configurations.cpp = {
-    {
-        name = "Launch file",
-        type = "cppdbg",
-        request = "launch",
-        program = function()
-            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
-        end,
-        cwd = '${workspaceFolder}',
-        stopAtEntry = true,
+local gdb_file = {
+    name = "Launch File (gdb): ",
+    type = "cppdbg",
+    request = "launch",
+    program = function()
+        return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+    end,
+    cwd = '${workspaceFolder}',
+    stopAtEntry = true,
 
-        setupCommands = {  
-            { 
-                text = '-enable-pretty-printing',
-                description =  'enable pretty printing',
-                ignoreFailures = false 
-            },
+    setupCommands = {  
+        { 
+            text = '-enable-pretty-printing',
+            description =  'enable pretty printing',
+            ignoreFailures = false 
         },
-    },
-    {
-        name = 'Attach to gdbserver :1234',
-        type = 'cppdbg',
-        request = 'launch',
-        MIMode = 'gdb',
-        miDebuggerServerAddress = 'localhost:1234',
-        miDebuggerPath = '/usr/bin/gdb',
-        cwd = '${workspaceFolder}',
-        program = function()
-            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
-        end,
-        setupCommands = {  
-            { 
-                text = '-enable-pretty-printing',
-                description =  'enable pretty printing',
-                ignoreFailures = false 
-            },
+    }
+}
+
+local gdb_server = {
+    name = 'Attach to gdbserver :3333',
+    type = 'cppdbg',
+    request = 'launch',
+    MIMode = 'gdb',
+    miDebuggerServerAddress = 'localhost:3333',
+    miDebuggerPath = '/usr/bin/gdb',
+    cwd = '${workspaceFolder}',
+    program = function()
+        return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+    end,
+    setupCommands = {  
+        { 
+            text = '-enable-pretty-printing',
+            description =  'enable pretty printing',
+            ignoreFailures = false 
         },
     },
 }
 
 
 -- https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation#ccrust-via-lldb-vscode
--- dap.configurations.cpp = {
---   {
---     name = 'Launch',
---     type = 'codelldb',
---     request = 'launch',
---     program = function()
---       return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
---     end,
---     cwd = '${workspaceFolder}',
---     stopOnEntry = false,
---     args = {},
---
---     -- 💀
---     -- if you change `runInTerminal` to true, you might need to change the yama/ptrace_scope setting:
---     --
---     --    echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
---     --
---     -- Otherwise you might get the following error:
---     --
---     --    Error on launch: Failed to attach to the target process
---     --
---     -- But you should be aware of the implications:
---     -- https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html
---     -- runInTerminal = false,
---   },
--- }
+local lldb = {
+    name = 'Launch File (lldb): ',
+    type = 'lldb',
+    request = 'launch',
+    program = function()
+      return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+    end,
+    cwd = '${workspaceFolder}',
+    stopOnEntry = false,
+    args = {},
+}
 
-dap.configurations.c = dap.configurations.cpp
-dap.configurations.rust = dap.configurations.cpp
-dap.configurations.zig = dap.configurations.cpp
+local lldb_server = {
+    name = 'Launch Server (lldb): ',
+    type = 'lldb',
+    request = 'launch',
+    program = function()
+      return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+    end,
+    cwd = '${workspaceFolder}',
+    stopOnEntry = false,
+    args = {},
+}
+
+dap.configurations.c = { lldb, gdb_file, gdb_server }
+dap.configurations.rust = { lldb }
+dap.configurations.zig = { lldb }
 
 dapui.setup()
+
+
+vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint)
+vim.keymap.set("n", "<leader>dc", dap.continue)
+vim.keymap.set("n", "<leader>ds", dap.step_into)
+vim.keymap.set("n", "<leader>dS", dap.step_over)
+vim.keymap.set("n", "<leader>da", dap.step_out)
+vim.keymap.set("n", "<leader>dA", dap.step_back)
+vim.keymap.set("n", "<leader>dr", dap.restart)
+
 
 dap.listeners.before.attach.dapui_config = function()
     dapui.open()
@@ -102,7 +109,3 @@ end
 dap.listeners.before.event_exited.dapui_config = function()
     dapui.close()
 end
-
-
-vim.keymap.set("n", "<leader>b", dap.toggle_breakpoint)
-vim.keymap.set("n", "<leader>gb", dap.toggle_breakpoint)
