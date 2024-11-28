@@ -27,7 +27,7 @@ lsp_zero.format_on_save({
         timeout_ms = 100000,
     },
     servers = {
-        ['tsserver'] = {'javascript', 'typescript'},
+        ['ts_ls'] = {'javascript', 'typescript'},
         ['rust_analyzer'] = {'rust'},
         ['gopls'] = {'go'},
     }
@@ -40,7 +40,7 @@ lsp_zero.setup()
 require('mason').setup({})
 
 require('mason-lspconfig').setup({
-	ensure_installed = { 'tsserver', 'rust_analyzer', 'gopls'},
+	ensure_installed = { 'ts_ls', 'rust_analyzer', 'gopls'},
 	handlers = {
 		lsp_zero.default_setup,
 		lua_ls = function()
@@ -69,6 +69,14 @@ require('mason-lspconfig').setup({
             }
            require('lspconfig').tailwindcss.setup(config)
         end,
+
+        clangd = function()
+            local config = {
+                filetypes = { "c", "cpp", "objc", "objcpp" },
+                root_dir = require('lspconfig.util').root_pattern("compile_commands.json", ".git") or vim.loop.cwd,
+            }
+           require('lspconfig').clangd.setup(config)
+        end
 	}
 })
 
@@ -94,3 +102,4 @@ cmp.setup({
 })
 
 vim.filetype.add({ extension = { templ = "templ" } })
+
